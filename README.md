@@ -345,3 +345,4 @@ Using JAX-RS filters for cross-cutting concerns like logging is significantly ad
 
 6. **Configurability**: Filters can be enabled/disabled, prioritised (using `@Priority`), or scoped to specific resources using `@NameBinding` annotations, providing fine-grained control without modifying business logic.
 # smartcampus-api
+# smartcampus-api
