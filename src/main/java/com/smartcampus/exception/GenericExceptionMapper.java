@@ -32,6 +32,11 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable exception) {
+        // If it's a standard JAX-RS exception (like 404 NotFound), let it handle its own response
+        if (exception instanceof javax.ws.rs.WebApplicationException) {
+            return ((javax.ws.rs.WebApplicationException) exception).getResponse();
+        }
+
         // Log the full exception server-side for debugging and monitoring
         LOGGER.log(Level.SEVERE, "Unhandled exception caught by global safety net: "
                 + exception.getClass().getSimpleName() + " - " + exception.getMessage(), exception);

@@ -78,8 +78,35 @@ public class SensorResource {
      * @throws LinkedResourceNotFoundException if roomId doesn't exist (→ 422)
      */
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response createSensor(Sensor sensor, @Context UriInfo uriInfo) {
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED, MediaType.WILDCARD})
+    public Response createSensor(
+            Sensor sensor,
+            @QueryParam("id") String qId,
+            @QueryParam("type") String qType,
+            @QueryParam("status") String qStatus,
+            @QueryParam("currentValue") @DefaultValue("0.0") double qValue,
+            @QueryParam("roomId") String qRoomId,
+            @Context UriInfo uriInfo) {
+
+        // Fallback: If JSON body is missing, try to build from Query Parameters
+        if (sensor == null || sensor.getId() == null) {
+            if (qId != null && !qId.trim().isEmpty()) {
+                sensor = new Sensor(qId, qType, qStatus, qValue, qRoomId);
+            }
+        }
+
+        // Validation: Ensure the request body is not empty and has required fields
+        if (sensor == null || sensor.getId() == null || sensor.getId().trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"No sensor data found. Please provide data in the JSON Body OR as URL parameters (id, type, status, currentValue, roomId).\"}")
+                    .build();
+        }
+        if (sensor.getRoomId() == null || sensor.getRoomId().trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Missing required field: 'roomId'. Sensors must be linked to a physical room.\"}")
+                    .build();
+        }
+
         // Validate that the referenced room exists
         Room room = dataStore.getRoom(sensor.getRoomId());
         if (room == null) {

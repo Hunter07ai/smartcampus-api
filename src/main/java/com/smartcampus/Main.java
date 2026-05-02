@@ -45,12 +45,10 @@ public class Main {
             LOGGER.log(Level.INFO, " Base URI : {0}", BASE_URI);
             LOGGER.log(Level.INFO, " API Root : {0}", BASE_URI);
             LOGGER.log(Level.INFO, "==============================================");
-            LOGGER.log(Level.INFO, "Press ENTER to stop the server...");
-
-            // Keep the server alive until the user presses Enter
-            System.in.read();
-            server.shutdownNow();
-            LOGGER.log(Level.INFO, "Server stopped.");
+            // Keep the server alive. Thread.currentThread().join() will wait forever
+            // until the process is terminated (e.g. via Ctrl+C).
+            LOGGER.log(Level.INFO, "Server is running. Press Ctrl+C to stop.");
+            Thread.currentThread().join();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to start server", e);
         }

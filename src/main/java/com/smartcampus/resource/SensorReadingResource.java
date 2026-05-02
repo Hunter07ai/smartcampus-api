@@ -81,6 +81,13 @@ public class SensorReadingResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addReading(SensorReading reading) {
+        // Validation: Ensure the request body is not empty
+        if (reading == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Request body is missing. Please provide a valid JSON reading object (e.g., {'value': 23.5}).\"}")
+                    .build();
+        }
+
         Sensor sensor = dataStore.getSensor(sensorId);
         if (sensor == null) {
             return Response.status(Response.Status.NOT_FOUND)

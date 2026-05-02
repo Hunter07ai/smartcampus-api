@@ -58,8 +58,28 @@ public class RoomResource {
      * @return 201 Created with Location header and the created Room in the body
      */
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response createRoom(Room room, @Context UriInfo uriInfo) {
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED, MediaType.WILDCARD})
+    public Response createRoom(
+            Room room,
+            @QueryParam("id") String qId,
+            @QueryParam("name") String qName,
+            @QueryParam("capacity") @DefaultValue("0") int qCapacity,
+            @Context UriInfo uriInfo) {
+        
+        // If the JSON body is missing, try to build the room from Query Parameters
+        if (room == null || room.getId() == null) {
+            if (qId != null && !qId.trim().isEmpty()) {
+                room = new Room(qId, qName, qCapacity);
+            }
+        }
+
+        // Final validation check
+        if (room == null || room.getId() == null || room.getId().trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"No room data found. Please provide data in the JSON Body OR as URL parameters (id, name, capacity).\"}")
+                    .build();
+        }
+
         dataStore.addRoom(room);
 
         // Build the URI for the newly created resource: /api/v1/rooms/{id}
